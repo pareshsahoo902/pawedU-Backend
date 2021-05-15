@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import User from './schema/users.js';
 import jwt from 'jsonwebtoken';
 import bcrypt, { hash } from 'bcrypt';
+import cors from "cors";
 
 //app config
 const app = express();
@@ -12,6 +13,7 @@ const connectionURL  ="mongodb+srv://pawedu:JIxVei9vi3cn2aXK@cluster0.9qsug.mong
 
 //middleware
 app.use(express.json())
+app.use(cors())
 
 // DB config
 mongoose.connect(connectionURL,{
@@ -28,7 +30,7 @@ app.get('/',(req,res)=>{
 
 
 app.post('/api/login', (req,res)=>{
-    User.find({username:req.body.name})
+    User.find({username:req.body.username})
     .exec()
     .then(user=>{
         if(user.length<1){
@@ -50,7 +52,6 @@ app.post('/api/login', (req,res)=>{
                     return res.status(200).json({
                         message:'Login Succesful',
                         token:token,
-                        signature:user[0].signature
                     })
                 }
                res.status(401).json({
@@ -64,9 +65,10 @@ app.post('/api/login', (req,res)=>{
 })
 
 
+
 app.post('/api/register',(req,res)=>{
 
-    User.find({username:req.body.name})
+    User.find({username:req.body.username})
     .exec()
     .then(user =>{
         if(user.length>0){
@@ -83,15 +85,16 @@ app.post('/api/register',(req,res)=>{
                 }else{
                     const userDeatils = new User({
                         _id:new mongoose.Types.ObjectId(),
-                        username:req.body.name,
+                        username:req.body.username,
+                        name:req.body.name,
                         password:hash,
                         imageUrl:req.body.imageUrl,
                         breed: req.body.breed,
-                        signature:req.body.signature
                 
                     });
                     userDeatils.save().then(result =>{
                         res.status(201).json({
+                            status:true,
                             message:"Registred Succesfully"
                         })
                     })
