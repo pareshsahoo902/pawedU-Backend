@@ -51,6 +51,7 @@ app.post('/api/login', (req,res)=>{
                     },"SecretJWTKey")
                     return res.status(200).json({
                         message:'Login Succesful',
+                        status:true,
                         token:token,
                     })
                 }
