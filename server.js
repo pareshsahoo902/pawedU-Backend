@@ -51,6 +51,7 @@ app.post('/api/login', (req,res)=>{
                     },"SecretJWTKey")
                     return res.status(200).json({
                         message:'Login Succesful',
+                        id:user[0]._id,
                         status:true,
                         token:token,
                     })
@@ -138,6 +139,48 @@ app.get('/api/getUsers', verifyToken, (req,res)=>{
 
 })
 
+
+app.get('/api/getUsers/:id',verifyToken,(req,res)=>{
+    jwt.verify(req.token,'SecretJWTKey',(err,authData)=>{
+        if(err){
+            res.sendStatus(403);
+        }else{
+            User
+            .findById(req.params.id)
+            .then(doc =>{
+                if(!doc){return res.sendStatus(404);}
+                else{
+                    res.status(200).send(doc);
+                }
+            })
+            
+        }
+    })
+})
+
+
+app.put('/api/user/:id', verifyToken, (req,res)=>{
+    jwt.verify(req.token,'SecretJWTKey',(err,authData)=>{
+        if(err){
+            res.sendStatus(404);
+        }else{
+            const options = { returnNewDocument: true };
+            User.findOneAndUpdate({_id:req.params.id}, req.body,options)
+            .then(user=>{
+                if(!user){
+                    return res.sendStatus(403);
+                }else{
+                    return res.status(200).send({
+                        message :"User Updated Succesfully!"
+                    });
+                }
+            })
+            .catch(err => {
+                return res.status(403).send(err);
+            })
+        }
+    })
+})
 
 function verifyToken(req ,res ,next){
     const bearerHeader = req.headers['authorization'];
